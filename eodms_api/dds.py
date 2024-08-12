@@ -63,7 +63,7 @@ class DDS_API():
         url_parsed = urlparse(download_url)
         dest_fn = os.path.join(out_folder, os.path.basename(url_parsed.path))
 
-        print(f"\nDownloading image to {dest_fn}...")
+        print(f"\nDownloading image to {dest_fn}...\n")
         print(f"download url: {download_url}")
 
         resp = requests.head(download_url, allow_redirects=True, verify=False)
