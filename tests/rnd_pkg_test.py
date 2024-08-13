@@ -21,7 +21,7 @@ mappings = {
                 "aeoid_idx": 8,
                 "sensor_id": 64
             },
-            "SGB": {
+            "SGBAirPhotos": {
                 "prefix": "image/napl/napl/l1/2022/",
                 "year_idx": 4,
                 "aeoid_idx": 8,
@@ -33,7 +33,7 @@ mappings = {
                 "aeoid_idx": 8,
                 "sensor_id": 28
             },
-            "WV2": {
+            "WorldView-2": {
                 "prefix": "image/w2/w2/",
                 "year_idx": 4,
                 "aeoid_idx": 8,
@@ -126,7 +126,9 @@ WHERE
     AND ai.aeoid = {aeoid}
 ORDER BY ci.start_datetime DESC
 LIMIT 100;
-'''
+'''     
+        # print(f"sql_cmd: {sql_cmd}")
+
         db_res = db.select(sql_cmd)
         print(f"db_res: {db_res}")
 
