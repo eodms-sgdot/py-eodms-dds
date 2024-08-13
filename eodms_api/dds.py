@@ -17,12 +17,12 @@ class DDS_API():
 
         # print(f"ssl.get_server_certificate(): {ssl.get_server_certificate(self.domain)}")
 
-        self.aaa = aaa.AAA_API()
+        self.aaa = aaa.AAA_API(username, password)
 
         # # Check if refresh is available first
         # refresh_info = self.aaa.refresh()
 
-        self.login_info = self.aaa.login(username, password)
+        self.login_info = self.aaa.login()
 
     def get_item(self, collection, item_uuid, catalog="EODMS"):
 
@@ -87,3 +87,7 @@ class DDS_API():
         # if dest_fn is None:
         #     return response.content
         # open(dest_fn, "wb").write(response.content)
+
+    def refresh_aaa(self):
+
+        self.aaa.refresh()

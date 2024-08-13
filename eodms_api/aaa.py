@@ -7,13 +7,17 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class AAA_API():
 
-    def __init__(self):
+    def __init__(self, username, password):
+
+        self.username = username
+        self.password = password
+
         self.domain = "https://www-staging-eodms.aws.nrcan-rncan.cloud"
 
         self.access_token = None
         self.refresh_token = None
 
-    def login(self, username, password):
+    def login(self):
 
         url = f"{self.domain}/aaa/v1/login"
 
@@ -21,8 +25,8 @@ class AAA_API():
         
         payload = {
             "grant_type": "password",
-            "password": password,
-            "username": username
+            "password": self.password,
+            "username": self.username
         }
 
         # print(f"payload: {payload}")
@@ -47,6 +51,10 @@ class AAA_API():
         url = f"{self.domain}/aaa/v1/refresh"
 
         print(f"refresh url: {url}")
+
+        if self.refresh_token is None:
+            login_info = self.login()
+            return login_info
 
         headers = {"Authorization": f"Bearer {self.refresh_token}"}
         resp = requests.get(url, headers=headers)

@@ -22,10 +22,22 @@ mappings = {
                 "sensor_id": 64
             },
             "SGB": {
-                "prefix": "image/napl/napl/l1/2022/"
+                "prefix": "image/napl/napl/l1/2022/",
+                "year_idx": 4,
+                "aeoid_idx": 8,
+                "sensor_id": 99
             },
             "Radarsat2": {
-                "prefix": "image/radarsat_2/sar/l1/2023/noamer/"
+                "prefix": "image/radarsat_2/sar/l1/2023/noamer/",
+                "year_idx": 4,
+                "aeoid_idx": 8,
+                "sensor_id": 28
+            },
+            "WV2": {
+                "prefix": "image/w2/w2/",
+                "year_idx": 4,
+                "aeoid_idx": 8,
+                "sensor_id": 33
             },
             "Radarsat1": {
                 "prefix": ""
@@ -37,10 +49,12 @@ mappings = {
     }
 }
 
-def get_item(eodms_user, eodms_pwd, collection, item_uuid, out_folder):
-    dds_api = dds.DDS_API(eodms_user, eodms_pwd)
+def get_item(dds_api, collection, item_uuid, out_folder):
+    
     # dds_api = dds.DDS_API('kballan_test', 'hgfhgfhjgf#')
-    print(f"login_info: {dds_api.login_info}")
+    # print(f"login_info: {dds_api.login_info}")
+
+    dds_api.refresh_aaa()
 
     # coll = "Radarsat2"
     # item_uuid = "ac7596d1-379c-4c32-a3c5-a058feadc9bc"
@@ -54,25 +68,19 @@ def get_item(eodms_user, eodms_pwd, collection, item_uuid, out_folder):
 
     # out_folder = "C:\\Working\\Development\\EODMS\\_packages\\py-eodms-api"
 
+    if item_info is None:
+        return None
+
+    if 'download_url' not in item_info.keys():
+        return None
+
     dds_api.download_item(os.path.abspath(out_folder))
 
-def run(eodms_user, eodms_pwd, collection, env, out_folder):
+    return item_info
 
-    # regions = {'noamer'}
-    # beam_modes = {'mde30'}
-    bucket_name = mappings[env].get('bucket_name')
-    s3_client = boto3.client('s3')
+def get_db_item(contents, collection, env):
 
     coll_map = mappings[env]['collections'][collection]
-
-    # object_prefix = f'image/rcm/sar/l1/2022/noamer/mde30/'
-    object_prefix = coll_map.get('prefix')
-
-    response = s3_client.list_objects_v2(Bucket=bucket_name,
-                                         Prefix=object_prefix)
-                                         #MaxKeys=100)
-    
-    contents = response.get('Contents')
 
     db_res = []
     while len(db_res) == 0:
@@ -113,7 +121,7 @@ INNER JOIN eodms_wesdmc.catalog_image ci
 WHERE 
     ai.rejected = false 
     AND ai.sensor_id = {sensor_id} 
-    AND ci.public_good = true
+    --AND ci.public_good = true
     AND ai.year = {year}
     AND ai.aeoid = {aeoid}
 ORDER BY ci.start_datetime DESC
@@ -125,9 +133,37 @@ LIMIT 100;
         if len(db_res) == 0:
             print("No image found in the database.")
 
-    uuid = db_res[0].get('unique_identifier')
+    return db_res[0]
 
-    get_item(eodms_user, eodms_pwd, collection, uuid, out_folder)
+def run(eodms_user, eodms_pwd, collection, env, out_folder):
+
+    dds_api = dds.DDS_API(eodms_user, eodms_pwd)
+
+    # regions = {'noamer'}
+    # beam_modes = {'mde30'}
+    bucket_name = mappings[env].get('bucket_name')
+    s3_client = boto3.client('s3')
+
+    coll_map = mappings[env]['collections'][collection]
+
+    # object_prefix = f'image/rcm/sar/l1/2022/noamer/mde30/'
+    object_prefix = coll_map.get('prefix')
+
+    response = s3_client.list_objects_v2(Bucket=bucket_name,
+                                         Prefix=object_prefix)
+                                         #MaxKeys=100)
+    
+    contents = response.get('Contents')
+
+    item_info = None
+    while item_info is None:
+        db_res = get_db_item(contents, collection, env)
+
+        uuid = db_res.get('unique_identifier')
+
+        item_info = get_item(dds_api, collection, uuid, out_folder)
+
+
 
 @click.command(context_settings={'help_option_names': ['-h', '--help']})
 @click.option('--username', '-u', required=True, help='The EODMS username.')
