@@ -21,9 +21,6 @@ class DDS_API():
 
         self.aaa = aaa.AAA_API(username, password, environment)
 
-        # # Check if refresh is available first
-        # refresh_info = self.aaa.refresh()
-
         self.login_info = self.aaa.login()
 
     def get_item(self, collection, item_uuid, catalog="EODMS"):
