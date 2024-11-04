@@ -20,7 +20,7 @@ pip install -e .
 
 This test gets an image item from the EODMS RAPI, parses the metadata and uses the UUID to download the image using the EODMS DDS API.
 
-For this test script, you will need to install the `py-eodms-rapi` package:
+For this test script, you will need to install the [py-eodms-rapi](https://github.com/eodms-sgdot/py-eodms-rapi) package:
 
 ```bash
 pip install py-eodms-rapi -U
@@ -48,7 +48,7 @@ python rapi_dds_test.py -u eodms_user -p eodms_pwd -c RCMImageProducts
 
 This test gets an image item from the EODMS STAC API and uses the `id` (UUID) to download the image using the EODMS DDS API.
 
-This script requires the `py-eodms-stac`:
+This script requires the [py-eodms-stac](https://github.com/eodms-sgdot/py-eodms-stac):
 
 ```bash
 cd tests
