@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 
 setup(
-    name='py-eodms-api',
+    name='py-eodms-dds',
     version='0.1.0', 
     author='Kevin Ballantyne (Natural Resources Canada)',
     author_email='kevin.ballantyne@nrcan-rncan.gc.ca',
@@ -9,8 +9,8 @@ setup(
     include_package_data=True, 
     # url='https://py-eodms-rapi.readthedocs.io/en/latest/',
     license='LICENSE',
-    description='EODMS API Client is a Python3 package used to access the ' \
-                'AAA and DDS API services provided by the Earth Observation Data ' \
+    description='EODMS DDS API Client is a Python3 package used to access the ' \
+                'DDS API services provided by the Earth Observation Data ' \
                 'Management System (EODMS) from Natural Resources Canada.',
     long_description=open('README.md').read(),
     long_description_content_type="text/markdown",

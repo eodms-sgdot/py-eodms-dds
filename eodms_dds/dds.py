@@ -12,12 +12,14 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class DDS_API():
 
-    def __init__(self, username, password):
-        self.domain = "https://www-staging-eodms.aws.nrcan-rncan.cloud"
+    def __init__(self, username, password, environment='prod'):
+        self.domain = "https://www.eodms-sgdot.nrcan-rncan.gc.ca"
+        if environment == 'staging':
+        	self.domain = "https://www-staging-eodms.aws.nrcan-rncan.cloud"
 
         # print(f"ssl.get_server_certificate(): {ssl.get_server_certificate(self.domain)}")
 
-        self.aaa = aaa.AAA_API(username, password)
+        self.aaa = aaa.AAA_API(username, password, environment)
 
         # # Check if refresh is available first
         # refresh_info = self.aaa.refresh()
@@ -34,7 +36,8 @@ class DDS_API():
         resp = requests.get(url, headers=headers, verify=False)
 
         if resp.status_code == 200:
-            print("\nSuccessfully item using DDS API")
+            print("\nSuccessfully got item using DDS API")
+            print(f"resp: {resp}")
             self.img_info = resp.json()
         elif resp.status_code == 202:
             self.img_info = resp.json()

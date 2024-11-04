@@ -1,4 +1,4 @@
-from eodms_api import dds
+from eodms_dds import dds
 import click
 import boto3
 import random
@@ -50,9 +50,6 @@ mappings = {
 }
 
 def get_item(dds_api, collection, item_uuid, out_folder):
-    
-    # dds_api = dds.DDS_API('kballan_test', 'hgfhgfhjgf#')
-    # print(f"login_info: {dds_api.login_info}")
 
     dds_api.refresh_aaa()
 
@@ -139,7 +136,7 @@ LIMIT 100;
 
 def run(eodms_user, eodms_pwd, collection, env, out_folder):
 
-    dds_api = dds.DDS_API(eodms_user, eodms_pwd)
+    dds_api = dds.DDS_API(eodms_user, eodms_pwd, env)
 
     # regions = {'noamer'}
     # beam_modes = {'mde30'}
