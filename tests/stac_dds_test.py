@@ -40,7 +40,8 @@ def run(eodms_user, eodms_pwd, collection, env, out_folder):
 @click.option('--username', '-u', required=True, help='The EODMS username.')
 @click.option('--password', '-p', required=True, help='The EODMS password.')
 @click.option('--collection', '-c', required=True, help='The collection name.')
-@click.option('--env', '-e', required=True, help='The AWS environment.')
+@click.option('--env', '-e', required=False, default='prod', 
+              help='The AWS environment.')
 @click.option('--out_folder', '-o', required=False, default='.',
               help='The output folder.')
 # @click.option('--uuid', '-u', required=True, help='The UUID of the image.')
