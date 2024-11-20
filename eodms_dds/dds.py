@@ -14,8 +14,6 @@ class DDS_API():
 
     def __init__(self, username, password, environment='prod'):
         self.domain = "https://www.eodms-sgdot.nrcan-rncan.gc.ca"
-        if environment == 'staging':
-        	self.domain = "https://www-staging-eodms.aws.nrcan-rncan.cloud"
 
         # print(f"ssl.get_server_certificate(): {ssl.get_server_certificate(self.domain)}")
 
