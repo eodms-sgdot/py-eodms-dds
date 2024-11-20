@@ -81,7 +81,7 @@ class AAA_API():
         return resp.json()
     
     def refresh(self):
-        url = f"{self.}/aaa/v1/refresh"
+        url = f"{self.domain}/aaa/v1/refresh"
 
         print(f"refresh url: {url}")
 
