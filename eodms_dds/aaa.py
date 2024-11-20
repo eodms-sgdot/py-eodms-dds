@@ -39,7 +39,7 @@ class AAA_API():
             "username": self.username
         }
 
-        # print(f"payload: {payload}")
+        print(f"payload: {payload}")
 
         resp = requests.post(url, json=payload, verify=False) #, verify=False)
 
