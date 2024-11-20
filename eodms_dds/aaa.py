@@ -17,8 +17,6 @@ class AAA_API():
         self.password = password
 
         self.domain = "https://www.eodms-sgdot.nrcan-rncan.gc.ca"
-        if environment == 'staging':
-            self.domain = "https://www-staging-eodms.aws.nrcan-rncan.cloud"
 
         self.access_token = None
         self.refresh_token = None
@@ -83,7 +81,7 @@ class AAA_API():
         return resp.json()
     
     def refresh(self):
-        url = f"{self.domain}/aaa/v1/refresh"
+        url = f"{self.}/aaa/v1/refresh"
 
         print(f"refresh url: {url}")
 
