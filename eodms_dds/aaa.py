@@ -21,13 +21,22 @@ class AAA_API():
         self.access_token = None
         self.refresh_token = None
 
-        pkg_folder = os.path.dirname(os.path.dirname(__file__))
-        self.auth_folder = os.path.join(pkg_folder, 'auth')
-
-        print(f"self.auth_folder: {self.auth_folder}")
+        user_folder = os.path.expanduser('~')
+        self.auth_folder = os.path.join(user_folder, '.eodms', 'aaa_auth')
 
         if not os.path.exists(self.auth_folder):
-            os.mkdir(self.auth_folder)
+            os.makedirs(self.auth_folder)
+
+    def _save_tokens(self, fn, in_json):
+        # Store the tokens
+        with open(fn, 'w') as f:
+            json.dump(in_json, f)
+
+    def _load_tokens(self, fn):
+        with open(fn, 'r') as file:
+            data = json.load(file)
+
+        return data
 
     def login(self):
 
@@ -45,7 +54,7 @@ class AAA_API():
 
         resp = requests.post(url, json=payload, verify=False) #, verify=False)
 
-        auth_fn = os.path.join(self.auth_folder, 'auth.json')
+        auth_fn = os.path.join(self.auth_folder, 'login.json')
 
         if resp.status_code == 200:
             print("\nSuccessfully logged in using AAA API")
@@ -55,13 +64,12 @@ class AAA_API():
 
             # login_json["login_timestamp"] = datetime.now()
 
-            # Store the tokens
-            with open(auth_fn, 'w') as f:
-                json.dump(login_json, f)
+            self._save_tokens(auth_fn, login_json)
+
         elif resp.status_code == 429:
             if os.path.exists(auth_fn):
-                with open(auth_fn, 'r') as file:
-                    data = json.load(file)
+
+                data = self._load_tokens(auth_fn)
                 
                 self.access_token = data.get('access_token')
                 self.refresh_token = data.get('refresh_token')
@@ -100,6 +108,9 @@ class AAA_API():
             print("\nSuccessfully refreshed using AAA API")
             ref_json = resp.json()
             self.access_token = ref_json.get('access_token')
+
+            auth_fn = os.path.join(self.auth_folder, 'refresh.json')
+            self._save_tokens(auth_fn, ref_json)
         else:
             print("\nFailed to refresh using AAA API")
             err_json = resp.json()
