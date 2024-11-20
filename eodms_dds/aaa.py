@@ -24,6 +24,8 @@ class AAA_API():
         pkg_folder = os.path.dirname(os.path.dirname(__file__))
         self.auth_folder = os.path.join(pkg_folder, 'auth')
 
+        print(f"self.auth_folder: {self.auth_folder}")
+
         if not os.path.exists(self.auth_folder):
             os.mkdir(self.auth_folder)
 
@@ -39,7 +41,7 @@ class AAA_API():
             "username": self.username
         }
 
-        print(f"payload: {payload}")
+        # print(f"payload: {payload}")
 
         resp = requests.post(url, json=payload, verify=False) #, verify=False)
 
