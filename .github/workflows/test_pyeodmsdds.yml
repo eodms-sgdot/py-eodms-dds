@@ -29,8 +29,8 @@ jobs:
       # Install package from setup.py
       - name: Install package from setup.py
         run: |
-          python setup.py install
-          pip install py-eodms-rapi -U
+          sudo python setup.py install
+          sudo pip install py-eodms-rapi -U
 
       # Runs a single command using the runners shell
       - name: Run py-eodms-dds Test 1 - RAPI and DDS Search and Order
