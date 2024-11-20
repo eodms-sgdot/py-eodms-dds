@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: py-eodms-rapi Tests
+name: py-eodms-dds Tests
 
 # Controls when the workflow will run
 on:
