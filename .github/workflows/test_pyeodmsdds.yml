@@ -39,5 +39,5 @@ jobs:
           EODMS_USER: ${{ secrets.EODMS_USER }}
           EODMS_PASSWORD: ${{ secrets.EODMS_PWD }}
         run: |
-          cd test
+          cd tests
           python rapi_dds_test.py -u $EODMS_USER -p $EODMS_PASSWORD -c RCMImageProducts
