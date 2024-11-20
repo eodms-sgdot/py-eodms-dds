@@ -18,7 +18,7 @@ class AAA_API():
 
         self.domain = "https://www.eodms-sgdot.nrcan-rncan.gc.ca"
         if environment == 'staging':
-        self.domain = "https://www-staging-eodms.aws.nrcan-rncan.cloud"
+            self.domain = "https://www-staging-eodms.aws.nrcan-rncan.cloud"
 
         self.access_token = None
         self.refresh_token = None
