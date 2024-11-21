@@ -25,15 +25,15 @@ class DDS_API():
 
         url = f"{self.domain}/dds/v1/item/{catalog}/{collection}/{item_uuid}"
 
-        print(f"get_item url: {url}")
+        print(f"DDS get_item url: {url}")
 
         headers = {"Authorization": f"Bearer {self.aaa.access_token}"}
         resp = requests.get(url, headers=headers, verify=False)
 
         if resp.status_code == 200:
             print("\nSuccessfully got item using DDS API")
-            print(f"resp: {resp}")
-            self.img_info = resp.json()
+            try:
+            	self.img_info = resp.json()
             except:
                 if resp.content.startswith('<HTML>'):
                     print(f"DDS API cannot be accessed at this time.")
