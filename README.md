@@ -14,6 +14,8 @@ pip install git+https://github.com/eodms-sgdot/py-eodms-dds.git
 > **_NOTE:_** Before using the DDS API, you'll need to get the UUID of an RCM image product. You can use the [py-eodms-rapi](https://github.com/eodms-sgdot/py-eodms-rapi) (see [rapi_dds_test.py](./tests/rapi_dds_test.py) for example code).
 
 ```python
+from eodms_dds import dds
+
 # First, create the DDS_API with your EODMS username and password.
 dds_api = dds.DDS_API(eodms_user, eodms_pwd)
 
