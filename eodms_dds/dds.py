@@ -15,11 +15,14 @@ class DDS_API():
     def __init__(self, username, password, environment='prod'):
         self.domain = "https://www.eodms-sgdot.nrcan-rncan.gc.ca"
 
+        if environment == 'staging':
+            self.domain = os.environ.get('DOMAIN')
+
         # print(f"ssl.get_server_certificate(): {ssl.get_server_certificate(self.domain)}")
 
         self.aaa = aaa.AAA_API(username, password, environment)
 
-        self.login_info = self.aaa.login()
+        # self.login_info = self.aaa.login()
 
     def get_item(self, collection, item_uuid, catalog="EODMS"):
 
@@ -27,13 +30,14 @@ class DDS_API():
 
         print(f"DDS get_item url: {url}")
 
-        headers = {"Authorization": f"Bearer {self.aaa.access_token}"}
+        access_token = self.aaa.get_access_token()
+        headers = {"Authorization": f"Bearer {access_token}"}
         resp = requests.get(url, headers=headers, verify=False)
 
         if resp.status_code == 200:
             print("\nSuccessfully got item using DDS API")
             try:
-            	self.img_info = resp.json()
+                self.img_info = resp.json()
             except:
                 if resp.content.startswith('<HTML>'):
                     print(f"DDS API cannot be accessed at this time.")
@@ -43,7 +47,7 @@ class DDS_API():
             status = self.img_info.get('status')
             print(f"Image is being processed. Its current status is {status}.")
         else:
-            print("\nFailed to get item using DDS API")
+            print("\nFailed to get item using DDS API\n")
             try:
                 err_json = resp.json()
                 error = err_json.get('error')
@@ -89,7 +93,3 @@ class DDS_API():
         # if dest_fn is None:
         #     return response.content
         # open(dest_fn, "wb").write(response.content)
-
-    def refresh_aaa(self):
-
-        self.aaa.refresh()

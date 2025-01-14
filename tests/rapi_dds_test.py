@@ -5,10 +5,7 @@ import os
 
 def get_item(dds_api, collection, item_uuid, out_folder):
 
-    dds_api.refresh_aaa()
-
-    print(f"collection: {collection}")
-    print(f"item_uuid: {item_uuid}")
+    # dds_api.refresh_aaa()
 
     item_info = dds_api.get_item(collection, item_uuid)
 
@@ -28,6 +25,8 @@ def get_item(dds_api, collection, item_uuid, out_folder):
 
 def extract_uuid(results):
 
+    # print(f"\nresults: {results}")
+
     mdata_full_name = results.get('metadataFullName')
     uuid = os.path.basename(mdata_full_name)
 
@@ -40,19 +39,24 @@ def run(eodms_user, eodms_pwd, collection, env, out_folder):
     rapi = EODMSRAPI(eodms_user, eodms_pwd)
 
     filters = {'Beam Mode Type': ('LIKE', ['%50m%']),
-            'Polarization': ('=', 'HH HV'),
-            'Incidence Angle': ('>=', 17)}
+                'Polarization': ('=', 'HH HV'),
+                'Incidence Angle': ('>=', 17)}
     
     rapi.search(collection, filters)
 
     res = rapi.get_results('full')
 
-    # print(f"res: {res[5]}")
+    print(f"\nThe following images in Collection {collection} " \
+            f"were found using the RAPI:")
+    for r in res:
+        uuid = extract_uuid(r)
+        print(f"  Item UUID: {uuid}")
 
-    uuid = extract_uuid(res[5])
+    uuid = extract_uuid(res[0])
+    print(f"\nUsing the first image (UUID: {uuid}) from the list to " \
+          f"download using the DDS...\n")
 
     item_info = get_item(dds_api, collection, uuid, out_folder)
-
 
 @click.command(context_settings={'help_option_names': ['-h', '--help']})
 @click.option('--username', '-u', required=True, help='The EODMS username.')

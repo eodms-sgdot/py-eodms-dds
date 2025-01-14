@@ -51,7 +51,7 @@ mappings = {
 
 def get_item(dds_api, collection, item_uuid, out_folder):
 
-    dds_api.refresh_aaa()
+    # dds_api.refresh_aaa()
 
     # coll = "Radarsat2"
     # item_uuid = "ac7596d1-379c-4c32-a3c5-a058feadc9bc"
@@ -135,6 +135,10 @@ LIMIT 100;
     return db_res[0]
 
 def run(eodms_user, eodms_pwd, collection, env, out_folder):
+
+    # aaa_api = aaa.AAA_API(eodms_user, eodms_pwd, env)
+
+    # aaa_api.get_token
 
     dds_api = dds.DDS_API(eodms_user, eodms_pwd, env)
 
