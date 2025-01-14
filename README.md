@@ -33,14 +33,6 @@ out_folder = "/home/myuser"
 dds_api.download_item(out_folder)
 ```
 
-### Refresh Session
-
-Each run of a script will require a refresh of the DDS API session. Previous tokens are stored in JSON files in `.eodms/aaa_auth` under the user folder.
-
-```python
-dds_api.refresh_aaa()
-```
-
 ## Testing
 
 ### Clone Repository
