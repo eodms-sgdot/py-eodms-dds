@@ -52,22 +52,24 @@ class AAA_Creds():
             - refresh_exp
         """
 
+        print()
+
         if 'access_token' in kwargs:
-            print("\nUpdating Access Token...")
+            print("Updating Access Token...")
             self.access_token = kwargs.get('access_token')
 
         if 'refresh_token' in kwargs:
-            print("\nUpdating Refresh Token...")
+            print("Updating Refresh Token...")
             self.refresh_token = kwargs.get('refresh_token')
 
         if 'access_exp' in kwargs:
             dt = kwargs.get('access_exp')
-            print(f"\nUpdating Access Expiration with {dt}...")
+            print(f"Updating Access Expiration...")
             self.access_exp = dt
 
         if 'refresh_exp':
             dt = kwargs.get('refresh_exp')
-            print(f"\nUpdating Refresh Expiration with {dt}...")
+            print(f"Updating Refresh Expiration...")
             self.refresh_exp = dt
 
     def set_fn(self, fn):
@@ -108,9 +110,6 @@ class AAA_Creds():
         Exports the credential values to the aaa_creds.json file.
         """
 
-        print(f"self.get_json: {self.get_json()}")
-        answer = input("Press enter...")
-
         with open(self.cred_fn, 'w') as f:
             json.dump(self.get_json(), f)
 
@@ -131,9 +130,6 @@ class AAA_Creds():
         self.access_exp = datetime.fromisoformat(creds.get('access_expiration'))
         self.refresh_exp = datetime.fromisoformat(creds.get('refresh_expiration'))
 
-        # print("Values from aaa_creds.json:")
-        # print(f"  Access Token: {self.access_token}")
-        # print(f"  Refresh Token: {self.refresh_token}")
         print(f"\nAccess Expiration: {self.access_exp}")
         print(f"Refresh Expiration: {self.refresh_exp}")
 
@@ -148,14 +144,6 @@ class AAA_API():
 
         self.domain = "https://www.eodms-sgdot.nrcan-rncan.gc.ca"
 
-        if environment == 'staging':
-            self.domain = os.environ.get('DOMAIN')
-
-        print(f"self.domain: {self.domain}")
-
-        # self.access_token = None
-        # self.refresh_token = None
-
         user_folder = os.path.expanduser('~')
         self.auth_folder = os.path.join(user_folder, '.eodms')
         self.aaa_creds.set_fn(os.path.join(self.auth_folder, 'aaa_creds.json'))
@@ -164,23 +152,6 @@ class AAA_API():
             os.makedirs(self.auth_folder)
 
         self.login_success = True
-
-    # def _save_tokens(self, fn):
-    #     # Store the tokens
-    #     with open(fn, 'w') as f:
-    #         json.dump(self.cred_dict, f)
-
-    # def _load_tokens(self, fn):
-    #     with open(fn, 'r') as file:
-    #         self.cred_dict = json.load(file)
-    
-    # def _print_times(self):
-
-    #     ses_time_str = str(timedelta(seconds=self.session_time))
-    #     ref_time_str = str(timedelta(seconds=self.refresh_time))
-            
-    #     print(f"\nTotal session time: {ses_time_str}")
-    #     print(f"Total refresh time: {ref_time_str}\n")
 
     def get_access_token(self):
         """
