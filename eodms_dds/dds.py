@@ -15,6 +15,8 @@ class DDS_API():
     def __init__(self, username, password, environment='prod'):
         self.domain = "https://www.eodms-sgdot.nrcan-rncan.gc.ca"
 
+        self.img_info = None
+
         if environment == 'staging':
             self.domain = os.environ.get('DOMAIN')
 
@@ -54,12 +56,16 @@ class DDS_API():
                 msg = err_json.get('message')
                 print(f"{error}: {msg}")
             except:
-                print(f"resp: {resp.content}")
+                # print(f"resp: {resp.content}")
                 return None
 
         return resp.json()
 
     def download_item(self, out_folder):
+
+        if self.img_info is None:
+            print(f"\nERROR: No image info available.\n")
+            return None
 
         download_url = self.img_info.get('download_url')
 
@@ -70,7 +76,7 @@ class DDS_API():
         dest_fn = os.path.join(out_folder, os.path.basename(url_parsed.path))
 
         print(f"\nDownloading image to {dest_fn}...\n")
-        print(f"download url: {download_url}")
+        # print(f"download url: {download_url}")
 
         resp = requests.head(download_url, allow_redirects=True, verify=False)
         resp_header = resp.headers
