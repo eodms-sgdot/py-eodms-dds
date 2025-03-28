@@ -6,8 +6,6 @@ import os
 
 def get_item(dds_api, collection, item_uuid, out_folder):
 
-    dds_api.refresh_aaa()
-
     item_info = dds_api.get_item(collection, item_uuid)
 
     if item_info is None:
