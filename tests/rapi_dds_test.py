@@ -58,6 +58,8 @@ def run(eodms_user, eodms_pwd, collection, env, out_folder):
 
     item_info = get_item(dds_api, collection, uuid, out_folder)
 
+    return dds_api
+
 @click.command(context_settings={'help_option_names': ['-h', '--help']})
 @click.option('--username', '-u', required=True, help='The EODMS username.')
 @click.option('--password', '-p', required=True, help='The EODMS password.')

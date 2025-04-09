@@ -52,11 +52,12 @@ test/__pycache__
 test/*.bat
 test/files/
 test/venv/
+test/db*.py
 
 # user specific overrides
 _update_repository.bat
 eodms_rapi/backup*/
 eodms_rapi/*.bak
 old_docs/
-open_env.ps1
+*.ps1
 *.bak
