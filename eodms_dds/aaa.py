@@ -18,10 +18,12 @@ class AAA_Creds():
         self.refresh_token = None
         self.access_exp = None
         self.refresh_exp = None
+        self.access_seconds = None
+        self.refresh_seconds = None
 
         self.cred_fn = None
 
-    def get_json(self):
+    def get_json(self, with_seconds=False):
         """
         Gets a JSON of the credentials
         """
@@ -34,12 +36,18 @@ class AAA_Creds():
         if isinstance(refresh_str, datetime):
             refresh_str = refresh_str.isoformat()
 
-        return {
+        out_json = {
             "access_token": self.access_token,
             "refresh_token": self.refresh_token,
             "access_expiration": access_str,
             "refresh_expiration": refresh_str
         }
+    
+        if with_seconds:
+            out_json['access_seconds'] = self.access_seconds
+            out_json['refresh_seconds'] = self.refresh_seconds
+
+        return out_json
     
     def set_vals(self, **kwargs):
         """
@@ -50,6 +58,8 @@ class AAA_Creds():
             - refresh_token
             - access_exp
             - refresh_exp
+            - access_seconds
+            - refresh_seconds
         """
 
         print()
@@ -64,13 +74,19 @@ class AAA_Creds():
 
         if kwargs.get('access_exp') is not None:
             dt = kwargs.get('access_exp')
-            print(f"Updating Access Expiration...")
+            print(f"Updating Access Expiration as {dt}...")
             self.access_exp = dt
 
         if kwargs.get('refresh_exp') is not None:
             dt = kwargs.get('refresh_exp')
-            print(f"Updating Refresh Expiration...")
+            print(f"Updating Refresh Expiration as {dt}...")
             self.refresh_exp = dt
+
+        if kwargs.get('access_seconds') is not None:
+            self.access_seconds = kwargs.get('access_seconds')
+
+        if kwargs.get('refresh_seconds') is not None:
+            self.refresh_seconds = kwargs.get('refresh_seconds')
 
     def set_fn(self, fn):
         """
@@ -129,9 +145,6 @@ class AAA_Creds():
 
         access_exp_str = creds.get('access_expiration')
         refresh_exp_str = creds.get('refresh_expiration')
-
-        print(f"access_exp_str: {access_exp_str}")
-        print(f"refresh_exp_str: {refresh_exp_str}")
 
         self.access_exp = datetime.fromisoformat(access_exp_str)
         self.refresh_exp = datetime.fromisoformat(refresh_exp_str) \
@@ -231,14 +244,16 @@ class AAA_API():
     def _update_tokens(self, **kwargs):
 
         # Determine the expiration times
-        refresh_time = self.response.get('refresh_token_expires_in')
-        access_time = self.response.get('expires_in')
+        refresh_time = self.response.get('refresh_token_expires_in') - 180
+        access_time = self.response.get('expires_in') - 120
         now_dt = datetime.now()
         self.access_exp = now_dt + timedelta(seconds=access_time)
         self.refresh_exp = now_dt + timedelta(seconds=refresh_time)
 
         kwargs["access_exp"] = self.access_exp
         kwargs["refresh_exp"] = self.refresh_exp
+        kwargs["access_seconds"] = self.response.get('refresh_token_expires_in')
+        kwargs["refresh_seconds"] = self.response.get('expires_in')
 
         # self.aaa_creds.set_vals(access_exp=self.access_exp,
         #                         refresh_exp=self.refresh_exp)
@@ -311,15 +326,15 @@ class AAA_API():
         # print(f"headers: {headers}")
         resp = requests.get(url, headers=headers, verify=False)
 
-        # print(f"\nrefresh resp: {resp.content}")
-
         if resp.status_code == 200:
             print("\nSuccessfully refreshed using AAA API")
             self.response = resp.json()
 
             new_access_token = self.response.get('access_token')
+            new_refresh_token = self.response.get('refresh_token')
 
-            self._update_tokens(access_token=new_access_token)
+            self._update_tokens(access_token=new_access_token,
+                                refresh_token=new_refresh_token)
 
             self.login_success = True
         else:
