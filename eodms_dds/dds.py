@@ -30,8 +30,6 @@ class DDS_API():
 
         url = f"{self.domain}/dds/v1/item/{catalog}/{collection}/{item_uuid}"
 
-        print(f"DDS get_item url: {url}")
-
         access_token = self.aaa.get_access_token()
         headers = {"Authorization": f"Bearer {access_token}"}
         resp = requests.get(url, headers=headers, verify=False)

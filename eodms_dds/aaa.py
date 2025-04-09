@@ -216,22 +216,6 @@ class AAA_API():
 
         return self.aaa_creds.access_token
 
-    # def calculate_expirations(self):
-    #     """
-    #     Calculates the expiration times for the Access Token 
-    #         and the Refresh Token.
-    #     """
-
-    #     # Determine the expiration times
-    #     refresh_time = self.response.get('refresh_token_expires_in')
-    #     access_time = self.response.get('expires_in')
-    #     now_dt = datetime.now()
-    #     self.access_exp = now_dt + timedelta(seconds=access_time)
-    #     self.refresh_exp = now_dt + timedelta(seconds=refresh_time)
-
-    #     self.aaa_creds.set_vals(access_exp=self.access_exp,
-    #                             refresh_exp=self.refresh_exp)
-
     def _print_response(self):
 
         print("\nAAA Response Info:")
