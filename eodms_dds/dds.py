@@ -32,7 +32,8 @@ class DDS_API():
 
         access_token = self.aaa.get_access_token()
         headers = {"Authorization": f"Bearer {access_token}"}
-        resp = requests.get(url, headers=headers, verify=False)
+        # resp = requests.get(url, headers=headers, trust_env=False, verify=False)
+        resp = self.aaa.prepare_request(url, headers=headers)
 
         if resp.status_code == 200:
             print("\nSuccessfully got item using DDS API")
@@ -76,9 +77,9 @@ class DDS_API():
         print(f"\nDownloading image to {dest_fn}...\n")
         # print(f"download url: {download_url}")
 
-        resp = requests.head(download_url, allow_redirects=True, verify=False)
-        resp_header = resp.headers
-        fsize = resp_header.get('Content-Length')
+        # resp = requests.head(download_url, allow_redirects=True, verify=False)
+        # resp_header = resp.headers
+        # fsize = resp_header.get('Content-Length')
         # open(fname, 'wb').write(resp.content)
 
         with requests.get(download_url, stream=True, verify=False) as stream:

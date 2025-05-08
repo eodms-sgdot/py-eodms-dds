@@ -216,6 +216,19 @@ class AAA_API():
 
         return self.aaa_creds.access_token
 
+    def prepare_request(self, url, method='GET', **kwargs):
+
+        req = requests.Request(method, url, **kwargs)
+        prepared = req.prepare()
+        
+        # Send the request
+        session = requests.Session()
+        session.trust_env = False
+        response = session.send(prepared)
+        # print(f"response.json:\n{json.dumps(response.json(), indent=4)}")
+
+        return response
+
     def _print_response(self):
 
         print("\nAAA Response Info:")
@@ -259,9 +272,8 @@ class AAA_API():
             "username": self.username
         }
 
-        resp = requests.post(url, json=payload, verify=False) #, verify=False)
-
-        # print(f"\nlogin resp: {resp.content}")
+        # resp = requests.post(url, json=payload, trust_env=False, verify=False) #, verify=False)
+        resp = self.prepare_request(url, "POST", data=payload)
 
         if resp.status_code == 200:
             print("\nSuccessfully logged in using AAA API")
@@ -307,8 +319,7 @@ class AAA_API():
         # resp = requests.get(url, verify=False)
 
         headers = {"Authorization": f"Bearer {self.aaa_creds.refresh_token}"}
-        # print(f"headers: {headers}")
-        resp = requests.get(url, headers=headers, verify=False)
+        resp = self.prepare_request(url, headers=headers)
 
         if resp.status_code == 200:
             print("\nSuccessfully refreshed using AAA API")
