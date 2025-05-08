@@ -18,8 +18,6 @@ setup(
         "dateparser", 
         "requests",
         "tqdm",
-        "geomet",
-        "lxml",
     ],
     # project_urls={
     #     "Source": "https://github.com/eodms-sgdot/py-eodms-rapi", 
