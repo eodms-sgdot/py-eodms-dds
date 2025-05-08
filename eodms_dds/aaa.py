@@ -273,7 +273,7 @@ class AAA_API():
         }
 
         # resp = requests.post(url, json=payload, trust_env=False, verify=False) #, verify=False)
-        resp = self.prepare_request(url, "POST", data=payload)
+        resp = self.prepare_request(url, "POST", json=payload)
 
         if resp.status_code == 200:
             print("\nSuccessfully logged in using AAA API")
