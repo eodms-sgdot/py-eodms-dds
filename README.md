@@ -84,10 +84,10 @@ Official Swagger documentation can be found here, https://eodms-sgdot.nrcan-rnca
 
 ## Cutover Plan
 
-Here is the to meet the cutover target of Mar 31 2026:
+Here is the plan to meet the cutover target of Mar 31 2026:
 
 1. Developers should import *both* `py-eodms-rapi` and `py-eodms-dds` into their code setup.
 2. For `rapi.search(..)` calls... you **don't** need to change these.
-3. For `rapi.order(..)` calls... you **do** need to change these and switch them over to `dds_api.get_item(..)`
+3. For `rapi.order(..)` calls... you **do** need to change these and switch them over to `dds_api.get_item(..)` calls
 
-The main difference is that `rapi.order` uses `sequence_id` from the search results, whereas `get_item` only accepts `uuid` search result. Thankfully, `uuid` is already returned by `rapi.search(..)`.
+The main difference is that `rapi.order` uses a `sequence_id`, whereas `get_item` only accepts a `uuid`. Thankfully, `uuid` is already returned by `rapi.search(..)`.
