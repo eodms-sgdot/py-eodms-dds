@@ -77,3 +77,17 @@ Options:
 ```bash
 python rapi_dds_test.py -u eodms_user -p eodms_pwd -c RCMImageProducts
 ```
+
+## Documentation
+
+Official Swagger documentation can be found here, https://eodms-sgdot.nrcan-rncan.gc.ca/dds/v1/swagger-ui/#/
+
+## Cutover Plan
+
+Here is the to meet the cutover target of Mar 31 2026:
+
+1. Developers should import *both* `py-eodms-rapi` and `py-eodms-dds` into their code setup.
+2. For `rapi.search(..)` calls... you **don't** need to change these.
+3. For `rapi.order(..)` calls... you **do** need to change these and switch them over to `dds_api.get_item(..)`
+
+The main difference is that `rapi.order` uses `sequence_id` from the search results, whereas `get_item` only accepts `uuid` search result. Thankfully, `uuid` is already returned by `rapi.search(..)`.
