@@ -22,6 +22,8 @@ class DDS_API():
 
         # print(f"ssl.get_server_certificate(): {ssl.get_server_certificate(self.domain)}")
 
+        self.header = '| EODMS_DDS | '
+
         self.aaa = aaa.AAA_API(username, password, environment)
 
         # self.login_info = self.aaa.login()
@@ -36,19 +38,21 @@ class DDS_API():
         resp = self.aaa.prepare_request(url, headers=headers)
 
         if resp.status_code == 200:
-            print("\nSuccessfully got item using DDS API")
+            print(f"\n{self.header}Successfully got item using DDS API")
             try:
                 self.img_info = resp.json()
             except:
                 if resp.content.startswith('<HTML>'):
-                    print(f"DDS API cannot be accessed at this time.")
+                    print(f"{self.header}DDS API cannot be accessed at this "
+                          f"time.")
                     return None
         elif resp.status_code == 202:
             self.img_info = resp.json()
             status = self.img_info.get('status')
-            print(f"Image is being processed. Its current status is {status}.")
+            print(f"{self.header}Image is being processed. Its current " 
+                  f"status is {status}.")
         else:
-            print("\nFailed to get item using DDS API\n")
+            print(f"\n{self.header}Failed to get item using DDS API\n")
             try:
                 err_json = resp.json()
                 error = err_json.get('error')
@@ -63,7 +67,7 @@ class DDS_API():
     def download_item(self, out_folder):
 
         if self.img_info is None:
-            print(f"\nERROR: No image info available.\n")
+            print(f"\n{self.header}ERROR: No image info available.\n")
             return None
 
         download_url = self.img_info.get('download_url')
@@ -74,7 +78,7 @@ class DDS_API():
         url_parsed = urlparse(download_url)
         dest_fn = os.path.join(out_folder, os.path.basename(url_parsed.path))
 
-        print(f"\nDownloading image to {dest_fn}...\n")
+        print(f"\n{self.header}Downloading image to {dest_fn}...\n")
         # print(f"download url: {download_url}")
 
         # resp = requests.head(download_url, allow_redirects=True, verify=False)
@@ -88,7 +92,6 @@ class DDS_API():
                         pipe,
                         method='write',
                         miniters=1,
-                        # total=float(fsize),
                         desc=os.path.basename(dest_fn)
                 ) as file_out:
                     for chunk in stream.iter_content(chunk_size=1024):
