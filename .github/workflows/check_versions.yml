@@ -38,14 +38,14 @@ jobs:
         run: |
           SETUP_VERSION=`python setup.py --version`
           CFG_VERSION=`python -c 'from setuptools.config.setupcfg import read_configuration as c; print(c("setup.cfg")["metadata"]["version"])'`
-          PK_VERSION=`python -c 'from eodms_dds import __version__; print(__version__)'`
+          PY_VERSION=`python -c 'from eodms_dds import __version__; print(__version__)'`
 
-          if [[ "$SETUP_VERSION" == "$CFG_VERSION" ]] && [[ "$CFG_VERSION" == "$PK_VERSION" ]]; then
+          if [[ "$SETUP_VERSION" == "$CFG_VERSION" ]] && [[ "$CFG_VERSION" == "$PY_VERSION" ]]; then
             echo "All versions are equal"
           else
             echo "At least one version is not equal"
             echo "SETUP_VERSION: ${SETUP_VERSION}"
             echo "CFG_VERSION: ${CFG_VERSION}"
-            echo "PK_VERSION: ${PK_VERSION}"
+            echo "PY_VERSION: ${PY_VERSION}"
             exit 1
           fi
