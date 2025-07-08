@@ -47,4 +47,5 @@ jobs:
             echo "SETUP_VERSION: ${SETUP_VERSION}"
             echo "CFG_VERSION: ${CFG_VERSION}"
             echo "PK_VERSION: ${PK_VERSION}"
+            exit 1
           fi
