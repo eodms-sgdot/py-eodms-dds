@@ -36,6 +36,11 @@ jobs:
       - name: Run py-eodms-dds Version Check
         # continue-on-error: true
         run: |
-          python setup.py --version
-          python -c 'from setuptools.config.setupcfg import read_configuration as c; print(c("setup.cfg")["metadata"]["version"])'
-          python -c 'from eodms_dds import __version__; print(__version__)'
+          SETUP_VERSION="$(python setup.py --version)"
+          CFG_VERSION="$(python -c 'from setuptools.config.setupcfg import read_configuration as c; print(c("setup.cfg")["metadata"]["version"])')"
+          PK_VERSION="$(python -c 'from eodms_dds import __version__; print(__version__)'"
+          if [[ "$SETUP_VERSION" != "$CFG_VERSION" ]] && [[ "$SETUP_VERSION" != "$PK_VERSION" ]] && [[ "$CFG_VERSION" != "$PK_VERSION" ]]; then
+              echo "All three variables are not equal"
+          else
+              echo "At least two variables are equal"
+          fi
