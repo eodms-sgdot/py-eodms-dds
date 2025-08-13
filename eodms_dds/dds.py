@@ -64,7 +64,11 @@ class DDS_API():
 
         return resp.json()
 
-    def download_item(self, out_folder):
+    def download_item(self, out_folder) -> str:
+        """
+        Downloads the item to the specified folder.
+        Returns the filename (full path).
+        """
 
         if self.img_info is None:
             print(f"\n{self.header}ERROR: No image info available.\n")
@@ -79,12 +83,6 @@ class DDS_API():
         dest_fn = os.path.join(out_folder, os.path.basename(url_parsed.path))
 
         print(f"\n{self.header}Downloading image to {dest_fn}...\n")
-        # print(f"download url: {download_url}")
-
-        # resp = requests.head(download_url, allow_redirects=True, verify=False)
-        # resp_header = resp.headers
-        # fsize = resp_header.get('Content-Length')
-        # open(fname, 'wb').write(resp.content)
 
         with requests.get(download_url, stream=True, verify=False) as stream:
             with open(dest_fn, 'wb') as pipe:
@@ -97,7 +95,5 @@ class DDS_API():
                     for chunk in stream.iter_content(chunk_size=1024):
                         file_out.write(chunk)
 
-        # response = requests.get(download_url, stream=True) #, verify=False)
-        # if dest_fn is None:
-        #     return response.content
-        # open(dest_fn, "wb").write(response.content)
+        return dest_fn
+
