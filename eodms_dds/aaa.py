@@ -139,8 +139,11 @@ class AAA_Creds():
         if not os.path.exists(self.cred_fn):
             return None
 
+        try:
         with open(self.cred_fn, 'r') as file:
             creds = json.load(file)
+        except:
+            return None
 
         self.access_token = creds.get('access_token')
         self.refresh_token = creds.get('refresh_token')

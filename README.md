@@ -1,6 +1,8 @@
 EODMS DDS API Client
 ====================
 
+The EODMS DDS API Client was designed using Python 3.10.
+
 ## Pip Installation
 
 ```bash

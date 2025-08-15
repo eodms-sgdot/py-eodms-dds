@@ -42,8 +42,9 @@ class DDS_API():
             try:
                 self.img_info = resp.json()
             except:
-                if resp.content.startswith('<HTML>'):
-                    print(f"{self.header}DDS API cannot be accessed at this "
+                resp_text = resp.text
+                if resp_text.startswith('<HTML>'):
+                    print(f"\n{self.header}DDS API cannot be accessed at this "
                           f"time.")
                     return None
         elif resp.status_code == 202:
