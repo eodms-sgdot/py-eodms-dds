@@ -229,6 +229,7 @@ class AAA_API():
         # Send the request
         session = requests.Session()
         session.trust_env = False
+        session.verify = False
         response = session.send(prepared)
         # self.logger.debug(f"response.json:\n{json.dumps(response.json(), indent=4)}")
 
