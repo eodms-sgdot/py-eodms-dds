@@ -6,6 +6,7 @@ import json
 # import time
 from datetime import datetime, timedelta
 import dateparser
+from . import log
 
 ssl._create_default_https_context = ssl._create_unverified_context
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -23,7 +24,7 @@ class AAA_Creds():
 
         self.cred_fn = None
 
-        self.header = '| EODMS_AAA | '
+        self.logger = log._EODMSLogger('EODMS_AAA', log.eodms_logger)
 
     def get_json(self, with_seconds=False):
         """
@@ -64,24 +65,22 @@ class AAA_Creds():
             - refresh_seconds
         """
 
-        print()
-
         if kwargs.get('access_token') is not None:
-            print(f"{self.header}Updating Access Token...")
+            self.logger.info("Updating Access Token...")
             self.access_token = kwargs.get('access_token')
 
         if kwargs.get('refresh_token') is not None:
-            print(f"{self.header}Updating Refresh Token...")
+            self.logger.info("Updating Refresh Token...")
             self.refresh_token = kwargs.get('refresh_token')
 
         if kwargs.get('access_exp') is not None:
             dt = kwargs.get('access_exp')
-            print(f"{self.header}Updating Access Expiration as {dt}...")
+            self.logger.info(f"Updating Access Expiration as {dt}...")
             self.access_exp = dt
 
         if kwargs.get('refresh_exp') is not None:
             dt = kwargs.get('refresh_exp')
-            print(f"{self.header}Updating Refresh Expiration as {dt}...")
+            self.logger.info(f"Updating Refresh Expiration as {dt}...")
             self.refresh_exp = dt
 
         if kwargs.get('access_seconds') is not None:
@@ -131,6 +130,8 @@ class AAA_Creds():
         with open(self.cred_fn, 'w') as f:
             json.dump(self.get_json(), f)
 
+        return self.cred_fn
+
     def import_vals(self):
         """
         Imports the credential values from the aaa_creds.json file.
@@ -140,8 +141,8 @@ class AAA_Creds():
             return None
 
         try:
-        with open(self.cred_fn, 'r') as file:
-            creds = json.load(file)
+            with open(self.cred_fn, 'r') as file:
+                creds = json.load(file)
         except:
             return None
 
@@ -155,12 +156,12 @@ class AAA_Creds():
         self.refresh_exp = datetime.fromisoformat(refresh_exp_str) \
                             if refresh_exp_str is not None else datetime.now()
 
-        print(f"\n{self.header}Access Expiration: {self.access_exp}")
-        print(f"{self.header}Refresh Expiration: {self.refresh_exp}")
+        self.logger.info(f"Access Expiration: {self.access_exp}")
+        self.logger.info(f"Refresh Expiration: {self.refresh_exp}")
 
 class AAA_API():
 
-    def __init__(self, username, password, environment='prod'):
+    def __init__(self, username, password):
 
         self.aaa_creds = AAA_Creds()
 
@@ -179,7 +180,7 @@ class AAA_API():
         self.login_success = True
         self.response = None
 
-        self.header = '| EODMS_AAA | '
+        self.logger = log._EODMSLogger('EODMS_AAA', log.eodms_logger)
 
     def get_access_token(self):
         """
@@ -205,19 +206,19 @@ class AAA_API():
         refresh_exp = self.aaa_creds.refresh_exp
 
         if now_dt >= access_exp and now_dt >= refresh_exp:
-            print(f"\n{self.header}Current Refresh Token has expired. " 
-                  f"Getting new Tokens...")
+            self.logger.info("Current Refresh Token has expired. "
+                  "Getting new Tokens...")
 
             # Get a new token
             self._login()
         elif now_dt >= access_exp and now_dt < refresh_exp:
-            print(f"\n{self.header}Current Access Token has expired. " \
+            self.logger.info("Current Access Token has expired. "
                   "Getting a new Access Token using current Refresh Token...")
 
             self._refresh()
 
         if not self.login_success:
-            print(f"\n{self.header}WARNING: Could not access current AAA " 
+            self.logger.warning("WARNING: Could not access current AAA "
                   f"session with existing tokens in {self.aaa_creds.cred_fn}")
             
         self._print_response()
@@ -233,18 +234,20 @@ class AAA_API():
         session = requests.Session()
         session.trust_env = False
         response = session.send(prepared)
-        # print(f"response.json:\n{json.dumps(response.json(), indent=4)}")
+        # self.logger.debug(f"response.json:\n{json.dumps(response.json(), indent=4)}")
 
         return response
 
     def _print_response(self):
+        log_str = "AAA Response Info:"
 
-        print(f"\n{self.header}AAA Response Info:")
         if self.response is None:
-            print("  N/A")
+            log_str += "\n  N/A"
         else:
             for k, v in self.response.items():
-                print(f"  {k}: {v}")
+                log_str += f"\n  {k}: {v}"
+
+        self.logger.debug(log_str)
 
     def _update_tokens(self, **kwargs):
 
@@ -284,7 +287,7 @@ class AAA_API():
         resp = self.prepare_request(url, "POST", json=payload)
 
         if resp.status_code == 200:
-            print(f"\n{self.header}Successfully logged in using AAA API")
+            self.logger.info("Successfully logged in using AAA API")
 
             self.response = resp.json()
 
@@ -306,12 +309,12 @@ class AAA_API():
             err_json = resp.json()
             error = err_json.get('error')
             msg = err_json.get('message')
-            print(f"\n{self.header}WARNING: Failed to log in using " 
+            self.logger.warning(f"WARNING: Failed to log in using "
                   f"AAA API: {error}: {msg}")
             self.login_success = False
 
             if resp.status_code == 429:
-                print(f"\n{self.header}Attempting to get new Access Token " 
+                self.logger.info("Attempting to get new Access Token "
                       "using existing Refresh Token...")
                 self._refresh()
 
@@ -323,7 +326,7 @@ class AAA_API():
 
         url = f"{self.domain}/aaa/v1/refresh"
 
-        # print(f"refresh url: {url}")
+        # self.logger.debug(f"refresh url: {url}")
 
         # resp = requests.get(url, verify=False)
 
@@ -331,7 +334,7 @@ class AAA_API():
         resp = self.prepare_request(url, headers=headers)
 
         if resp.status_code == 200:
-            print(f"\n{self.header}Successfully refreshed using AAA API")
+            self.logger.info("Successfully refreshed using AAA API")
             self.response = resp.json()
 
             new_access_token = self.response.get('access_token')
@@ -345,7 +348,7 @@ class AAA_API():
             err_json = resp.json()
             error = err_json.get('error')
             msg = err_json.get('message')
-            print(f"\n{self.header}WARNING: Failed to refresh using " 
+            self.logger.error("WARNING: Failed to refresh using "
                   f"AAA API: {error}: {msg}")
             self.login_success = False
 

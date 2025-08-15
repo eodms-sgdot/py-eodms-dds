@@ -6,9 +6,19 @@ from tqdm.auto import tqdm
 import ssl
 
 from . import aaa
+from . import log
 
 ssl._create_default_https_context = ssl._create_unverified_context
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+# class DDSUnavailableException(Exception):
+#     pass
+
+# class DDSAuthException(Exception):
+#     pass
+
+# class DDSException(Exception):
+#     pass
 
 class DDS_API():
 
@@ -20,11 +30,11 @@ class DDS_API():
         if environment == 'staging':
             self.domain = os.environ.get('DOMAIN')
 
-        # print(f"ssl.get_server_certificate(): {ssl.get_server_certificate(self.domain)}")
+        self.logger = log._EODMSLogger('EODMS_DSS', log.eodms_logger)
 
-        self.header = '| EODMS_DDS | '
+        # self.logger.debug((f"ssl.get_server_certificate(): {ssl.get_server_certificate(self.domain)}")
 
-        self.aaa = aaa.AAA_API(username, password, environment)
+        self.aaa = aaa.AAA_API(username, password)
 
         # self.login_info = self.aaa.login()
 
@@ -38,29 +48,31 @@ class DDS_API():
         resp = self.aaa.prepare_request(url, headers=headers)
 
         if resp.status_code == 200:
-            print(f"\n{self.header}Successfully got item using DDS API")
+            self.logger.info("Successfully got item using DDS API")
             try:
                 self.img_info = resp.json()
             except:
                 resp_text = resp.text
-                if resp_text.startswith('<HTML>'):
-                    print(f"\n{self.header}DDS API cannot be accessed at this "
-                          f"time.")
+                if resp_text.content.startswith('<HTML>'):
+                    self.logger.info("DDS API cannot be accessed at this time.")
                     return None
         elif resp.status_code == 202:
             self.img_info = resp.json()
             status = self.img_info.get('status')
-            print(f"{self.header}Image is being processed. Its current " 
+            self.logger.info(f"Image is being processed. Its current "
                   f"status is {status}.")
         else:
-            print(f"\n{self.header}Failed to get item using DDS API\n")
             try:
                 err_json = resp.json()
                 error = err_json.get('error')
                 msg = err_json.get('message')
-                print(f"{error}: {msg}")
+                self.logger.error(
+                    "Failed to get item using DDS API\n\n"
+                    f"{error}: {msg}"
+                )
             except:
-                # print(f"resp: {resp.content}")
+                self.logger.error("Failed to get item using DDS API\n")
+                #  self.logger.error(f"resp: {resp.content}")
                 return None
 
         return resp.json()
@@ -72,7 +84,7 @@ class DDS_API():
         """
 
         if self.img_info is None:
-            print(f"\n{self.header}ERROR: No image info available.\n")
+            self.logger.error("ERROR: No image info available.\n")
             return None
 
         download_url = self.img_info.get('download_url')
@@ -83,7 +95,7 @@ class DDS_API():
         url_parsed = urlparse(download_url)
         dest_fn = os.path.join(out_folder, os.path.basename(url_parsed.path))
 
-        print(f"\n{self.header}Downloading image to {dest_fn}...\n")
+        self.logger.info(f"Downloading image to {dest_fn}...\n")
 
         with requests.get(download_url, stream=True, verify=False) as stream:
             with open(dest_fn, 'wb') as pipe:
@@ -97,4 +109,3 @@ class DDS_API():
                         file_out.write(chunk)
 
         return dest_fn
-
