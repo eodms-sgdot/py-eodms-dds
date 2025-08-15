@@ -40,9 +40,7 @@ jobs:
           CFG_VERSION=`python -c 'from setuptools.config.setupcfg import read_configuration as c; print(c("setup.cfg")["metadata"]["version"])'`
           PY_VERSION=`python -c 'from eodms_dds import __version__; print(__version__)'`
 
-          pwd
-
-          ls
+          cat eodms_dds/__version__.py
 
           if [[ "$SETUP_VERSION" == "$CFG_VERSION" ]] && [[ "$CFG_VERSION" == "$PY_VERSION" ]]; then
             echo "All versions are equal"
