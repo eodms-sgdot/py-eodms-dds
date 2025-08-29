@@ -176,7 +176,7 @@ class AAA_API():
         self.login_success = True
         self.response = None
 
-        self.logger = log.EODMSLogger('EODMS_AAA', log.eodms_logger)
+        self.logger = log._EODMSLogger('EODMS_AAA', log.eodms_logger)
 
     def get_access_token(self):
         """
