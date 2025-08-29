@@ -91,5 +91,6 @@ Here is the plan to meet the cutover target of Mar 31 2026:
 2. For `rapi.search(..)` calls... you **don't** need to change these.
 3. For `rapi.order(..)` calls... you **do** need to change these and switch them over to `dds_api.get_item(..)` calls. See [rapi_dds_test.py](https://github.com/eodms-sgdot/py-eodms-dds/blob/main/tests/rapi_dds_test.py) an example.
 4. A new version of eodms-cli will also be released to handle the switch to py-eodms-dds. See: https://github.com/eodms-sgdot/eodms-cli/issues/46.
+5. Once all users are switched over, the https://www.eodms-sgdot.nrcan-rncan.gc.ca/wes/rapi/order endpoint will be blocked. Downloads will only be possible from the new endpoint, https://eodms-sgdot.nrcan-rncan.gc.ca/dds 
 
 The main difference is that `rapi.order` uses a `sequence_id`, whereas `get_item` only accepts a `uuid`. Thankfully, `uuid` is already returned by `rapi.search(..)`.
