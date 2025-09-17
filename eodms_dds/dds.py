@@ -6,7 +6,7 @@ from tqdm.auto import tqdm
 import ssl
 
 from . import aaa
-from . import log
+from . import api_logger
 
 ssl._create_default_https_context = ssl._create_unverified_context
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -30,7 +30,7 @@ class DDS_API():
         if environment == 'staging':
             self.domain = os.environ.get('DOMAIN')
 
-        self.logger = log._EODMSLogger('EODMS_DSS', log.eodms_logger)
+        self.logger = api_logger.EODMSLogger('EODMS_DSS', api_logger.eodms_logger)
 
         # self.logger.debug((f"ssl.get_server_certificate(): {ssl.get_server_certificate(self.domain)}")
 
