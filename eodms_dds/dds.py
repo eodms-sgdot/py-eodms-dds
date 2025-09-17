@@ -6,10 +6,19 @@ from tqdm.auto import tqdm
 import ssl
 
 from . import aaa
-from . import log
+from . import api_logger
 
 ssl._create_default_https_context = ssl._create_unverified_context
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+# class DDSUnavailableException(Exception):
+#     pass
+
+# class DDSAuthException(Exception):
+#     pass
+
+# class DDSException(Exception):
+#     pass
 
 class DDS_API():
 
@@ -21,11 +30,11 @@ class DDS_API():
         if environment == 'staging':
             self.domain = os.environ.get('DOMAIN')
 
-        self.logger = log._EODMSLogger('EODMS_DSS', log.eodms_logger)
+        self.logger = api_logger.EODMSLogger('EODMS_DSS', api_logger.eodms_logger)
 
         # self.logger.debug((f"ssl.get_server_certificate(): {ssl.get_server_certificate(self.domain)}")
 
-        self.aaa = aaa.AAA_API(username, password, environment)
+        self.aaa = aaa.AAA_API(username, password)
 
         # self.login_info = self.aaa.login()
 
@@ -43,7 +52,8 @@ class DDS_API():
             try:
                 self.img_info = resp.json()
             except:
-                if resp.content.startswith('<HTML>'):
+                resp_text = resp.text
+                if resp_text.content.startswith('<HTML>'):
                     self.logger.info("DDS API cannot be accessed at this time.")
                     return None
         elif resp.status_code == 202:
@@ -99,4 +109,3 @@ class DDS_API():
                         file_out.write(chunk)
 
         return dest_fn
-

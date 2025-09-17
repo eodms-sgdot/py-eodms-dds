@@ -6,8 +6,8 @@ import json
 # import time
 from datetime import datetime, timedelta
 import dateparser
-
-from . import log
+from . import api_logger
+from .__version__ import __version__
 
 ssl._create_default_https_context = ssl._create_unverified_context
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -25,7 +25,7 @@ class AAA_Creds():
 
         self.cred_fn = None
 
-        self.logger = log._EODMSLogger('EODMS_AAA', log.eodms_logger)
+        self.logger = api_logger.EODMSLogger('EODMS_AAA', api_logger.eodms_logger)
 
     def get_json(self, with_seconds=False):
         """
@@ -131,6 +131,8 @@ class AAA_Creds():
         with open(self.cred_fn, 'w') as f:
             json.dump(self.get_json(), f)
 
+        return self.cred_fn
+
     def import_vals(self):
         """
         Imports the credential values from the aaa_creds.json file.
@@ -139,8 +141,11 @@ class AAA_Creds():
         if not os.path.exists(self.cred_fn):
             return None
 
-        with open(self.cred_fn, 'r') as file:
-            creds = json.load(file)
+        try:
+            with open(self.cred_fn, 'r') as file:
+                creds = json.load(file)
+        except:
+            return None
 
         self.access_token = creds.get('access_token')
         self.refresh_token = creds.get('refresh_token')
@@ -157,7 +162,7 @@ class AAA_Creds():
 
 class AAA_API():
 
-    def __init__(self, username, password, environment='prod'):
+    def __init__(self, username, password):
 
         self.aaa_creds = AAA_Creds()
 
@@ -176,7 +181,7 @@ class AAA_API():
         self.login_success = True
         self.response = None
 
-        self.logger = log.EODMSLogger('EODMS_AAA', log.eodms_logger)
+        self.logger = api_logger.EODMSLogger('EODMS_AAA', api_logger.eodms_logger)
 
     def get_access_token(self):
         """
@@ -203,7 +208,7 @@ class AAA_API():
 
         if now_dt >= access_exp and now_dt >= refresh_exp:
             self.logger.info("Current Refresh Token has expired. "
-                  "Getting new Tokens...")
+                        "Getting new Tokens...")
 
             # Get a new token
             self._login()
@@ -230,7 +235,8 @@ class AAA_API():
         session = requests.Session()
         session.trust_env = False
         response = session.send(prepared)
-        # self.logger.debug(f"response.json:\n{json.dumps(response.json(), indent=4)}")
+
+        self.logger.info(f"response headers: {response.request.headers}")
 
         return response
 
@@ -321,8 +327,6 @@ class AAA_API():
         """
 
         url = f"{self.domain}/aaa/v1/refresh"
-
-        # self.logger.debug(f"refresh url: {url}")
 
         # resp = requests.get(url, verify=False)
 
