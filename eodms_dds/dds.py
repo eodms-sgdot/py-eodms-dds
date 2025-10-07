@@ -51,11 +51,13 @@ class DDS_API():
             self.logger.info("Successfully got item using DDS API")
             try:
                 self.img_info = resp.json()
-            except:
-                resp_text = resp.text
-                if resp_text.content.startswith('<HTML>'):
+            except requests.exceptions.JSONDecodeError as exception:
+                content_type = resp.headers["Content-Type"]
+                if "text/html" in content_type:
                     self.logger.info("DDS API cannot be accessed at this time.")
                     return None
+                else:
+                    raise exception
         elif resp.status_code == 202:
             self.img_info = resp.json()
             status = self.img_info.get('status')
