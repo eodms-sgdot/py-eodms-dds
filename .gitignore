@@ -61,3 +61,4 @@ eodms_rapi/*.bak
 old_docs/
 *.ps1
 *.bak
+/tests
