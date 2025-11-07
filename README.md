@@ -88,7 +88,6 @@ Official Swagger documentation can be found here, https://eodms-sgdot.nrcan-rnca
 
 Here is the plan to meet the cutover target of Mar 31 2026:
 
-0. Developers should request access by emailing eodms-sgdot@nrcan-rncan.gc.ca.
 1. Developers should import *both* `py-eodms-rapi` and `py-eodms-dds` into their code setup.
 2. For `rapi.search(..)` calls... you **don't** need to change these.
 3. For `rapi.order(..)` calls... you **do** need to change these and switch them over to `dds_api.get_item(..)` calls. See [rapi_dds_test.py](https://github.com/eodms-sgdot/py-eodms-dds/blob/main/tests/rapi_dds_test.py) an example.
