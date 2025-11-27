@@ -1,5 +1,5 @@
 from eodms_dds import dds
-from eodms_stac import stac
+from eodms_dds import search
 # import json
 import click
 import os
@@ -22,16 +22,13 @@ def run(eodms_user, eodms_pwd, collection, env, out_folder):
 
     dds_api = dds.DDS_API(eodms_user, eodms_pwd, env)
 
-    stac_api = stac.EODMSSTAC() #eodms_user, eodms_pwd)
+    search_api = search.Search_API(eodms_user, eodms_pwd, env)
 
-    if collection == "RCMImageProducts":
-        stac_coll = "rcm"
-
-    res = stac_api.search(paged=True, collections=stac_coll, limit=20)
-
-    uuid = res.get('features')[5].get('id')
-
-    get_item(dds_api, collection, uuid, out_folder)
+    res = search_api.search_items(collections=[collection], datetime="2024-01-01/2025-12-31")
+    #print(f"Number of results: {len(res)}")
+    #if res and len(res) > 0:
+        #uuid = res[0].get('id')
+        #get_item(dds_api, collection, uuid, out_folder)
 
 
 @click.command(context_settings={'help_option_names': ['-h', '--help']})
