@@ -24,11 +24,10 @@ def run(eodms_user, eodms_pwd, collection, env, out_folder):
 
     search_api = search.Search_API(eodms_user, eodms_pwd, env)
 
-    res = search_api.search_items(collections=[collection], datetime="2025-01-01/2025-01-02", bbox=[-73.9966021388108, 45.3854030130529, -73.4738652778201, 45.7075796336657])
-    #print(f"Number of results: {len(res)}")
-    #if res and len(res) > 0:
-        #uuid = res[0].get('id')
-        #get_item(dds_api, collection, uuid, out_folder)
+    #res = search_api.search_items(collections=[collection], datetime="2025-01-01/2025-01-02", bbox=[-73.9966021388108, 45.3854030130529, -73.4738652778201, 45.7075796336657])
+
+
+    res = search_api.search_items(collections=[collection])
 
 
 @click.command(context_settings={'help_option_names': ['-h', '--help']})

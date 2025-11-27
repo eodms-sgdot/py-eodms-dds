@@ -104,7 +104,7 @@ class Search_API():
             search_params.update(kwargs)
 
             # Execute search
-            search = client.search(**search_params)
+            search = client.search(**search_params, method='GET')
   
             search_results = search.item_collection()
             
