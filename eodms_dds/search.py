@@ -105,9 +105,8 @@ class Search_API():
             search_params.update(kwargs)
 
             # Execute search
-            search = client.search(
-                collections=['RCMImageProducts']
-            )
+            search = client.search(**search_params)
+            print(f"Search return code: {search}")
   
             search_results = search.item_collection()
             
