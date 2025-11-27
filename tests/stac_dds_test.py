@@ -24,7 +24,7 @@ def run(eodms_user, eodms_pwd, collection, env, out_folder):
 
     search_api = search.Search_API(eodms_user, eodms_pwd, env)
 
-    res = search_api.search_items(collections=[collection], datetime="2024-01-01/2025-12-31")
+    res = search_api.search_items(collections=[collection], datetime="2025-01-01/2025-01-02", bbox=[-73.9966021388108, 45.3854030130529, -73.4738652778201, 45.7075796336657])
     #print(f"Number of results: {len(res)}")
     #if res and len(res) > 0:
         #uuid = res[0].get('id')
@@ -32,8 +32,8 @@ def run(eodms_user, eodms_pwd, collection, env, out_folder):
 
 
 @click.command(context_settings={'help_option_names': ['-h', '--help']})
-@click.option('--username', '-u', required=True, help='The EODMS username.')
-@click.option('--password', '-p', required=True, help='The EODMS password.')
+@click.option('--username', '-u', required=False, help='The EODMS username.')
+@click.option('--password', '-p', required=False, help='The EODMS password.')
 @click.option('--collection', '-c', required=True, help='The collection name.')
 @click.option('--env', '-e', required=False, default='prod', 
               help='The AWS environment.')

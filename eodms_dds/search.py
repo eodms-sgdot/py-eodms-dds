@@ -23,20 +23,19 @@ class Search_API():
         :param environment: Environment to use ('prod' or 'staging')
         """
 
-        # ssl_cert_path = os.path.expanduser('C:/Users/wmackinn/.aws/nrcan+azure+amazon.cer')
-        # os.environ['SSL_CERT_FILE'] = ssl_cert_path
-        # os.environ['REQUESTS_CA_BUNDLE'] = ssl_cert_path
-        # os.environ['CURL_CA_BUNDLE'] = ssl_cert_path
-        # os.environ['AWS_CA_BUNDLE'] = ssl_cert_path
-        # os.path.exists(ssl_cert_path)
-
         self.domain = "https://www.eodms-sgdot.nrcan-rncan.gc.ca"
-        #self.domain = "https://www-staging-eodms.aws.nrcan-rncan.cloud"
         self.search_endpoint = f"{self.domain}/search"
 
         if environment == 'staging':
-            self.domain = os.environ.get('DOMAIN')
+            ssl_cert_path = os.path.expanduser('C:/Users/wmackinn/.aws/nrcan+azure+amazon.cer')
+            os.environ['SSL_CERT_FILE'] = ssl_cert_path
+            os.environ['REQUESTS_CA_BUNDLE'] = ssl_cert_path
+            os.environ['CURL_CA_BUNDLE'] = ssl_cert_path
+            os.environ['AWS_CA_BUNDLE'] = ssl_cert_path
+            os.path.exists(ssl_cert_path)
+            self.domain = "https://www-staging-eodms.aws.nrcan-rncan.cloud"
             self.search_endpoint = f"{self.domain}/search"
+            print(f"username: {username}, password: {password}")
 
         self.logger = api_logger.EODMSLogger('EODMS_Search', api_logger.eodms_logger)
 
@@ -106,11 +105,10 @@ class Search_API():
 
             # Execute search
             search = client.search(**search_params)
-            print(f"Search return code: {search}")
   
             search_results = search.item_collection()
             
-            self.logger.info("Search completed successfully")
+            self.logger.info("Search completed successfully .......")
             
             return search_results
 
