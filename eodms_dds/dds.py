@@ -22,7 +22,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class DDS_API():
 
-    def __init__(self, username, password, environment='prod'):
+    def __init__(self, aaa_api, environment='prod'):
         self.domain = "https://www.eodms-sgdot.nrcan-rncan.gc.ca"
 
         self.img_info = None
@@ -32,9 +32,9 @@ class DDS_API():
 
         self.logger = api_logger.EODMSLogger('EODMS_DSS', api_logger.eodms_logger)
 
-        # self.logger.debug((f"ssl.get_server_certificate(): {ssl.get_server_certificate(self.domain)}")
+        # self.logger.debug((f"ssl.get_server_certificate(): {ssl.get_server_certificate(self.domain)}"))
 
-        self.aaa = aaa.AAA_API(username, password)
+        self.aaa = aaa_api
 
         # self.login_info = self.aaa.login()
 
