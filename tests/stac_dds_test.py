@@ -30,15 +30,6 @@ def search(aaa_api=None, environment='prod',
     domain = "https://www.eodms-sgdot.nrcan-rncan.gc.ca"
     search_endpoint = f"{domain}/search"
     
-    if environment == 'staging':
-        ssl_cert_path = os.path.expanduser('C:/Users/wmackinn/.aws/nrcan+azure+amazon.cer')
-        os.environ['SSL_CERT_FILE'] = ssl_cert_path
-        os.environ['REQUESTS_CA_BUNDLE'] = ssl_cert_path
-        os.environ['CURL_CA_BUNDLE'] = ssl_cert_path
-        os.environ['AWS_CA_BUNDLE'] = ssl_cert_path
-        domain = "https://www-staging-eodms.aws.nrcan-rncan.cloud"
-        search_endpoint = f"{domain}/search"
-    
     # Prepare headers with authentication if available
     headers = {}
     if aaa_api:
