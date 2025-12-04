@@ -1,36 +1,25 @@
 import os
 import requests
 from requests.packages import urllib3
-from urllib.parse import urlparse
 from tqdm.auto import tqdm
 import ssl
+from urllib.parse import unquote
+from urllib.parse import urlparse, parse_qs
+
 
 from . import aaa
 from . import api_logger
-
-ssl._create_default_https_context = ssl._create_unverified_context
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-# class DDSUnavailableException(Exception):
-#     pass
-
-# class DDSAuthException(Exception):
-#     pass
-
-# class DDSException(Exception):
-#     pass
+from . import config
 
 class DDS_API():
 
     def __init__(self, aaa_api, environment='prod'):
-        self.domain = "https://www.eodms-sgdot.nrcan-rncan.gc.ca"
-
+        domain_config = config.get_domain_config(environment)
+        self.domain = domain_config['domain']
+        self.verify_ssl = domain_config.get('verify_ssl', True)
         self.img_info = None
 
-        if environment == 'staging':
-            self.domain = os.environ.get('DOMAIN')
-
-        self.logger = api_logger.EODMSLogger('EODMS_DSS', api_logger.eodms_logger)
+        self.logger = api_logger.EODMSLogger('eodms_dds', api_logger.eodms_logger)
 
         # self.logger.debug((f"ssl.get_server_certificate(): {ssl.get_server_certificate(self.domain)}"))
 
@@ -66,10 +55,10 @@ class DDS_API():
                 err_json = resp.json()
                 error = err_json.get('error')
                 msg = err_json.get('message')
-                self.logger.error(
-                    "Failed to get item using DDS API\n\n"
-                    f"{error}: {msg}"
-                )
+                request_id = err_json.get('request_id')
+                trace_id = err_json.get('trace_id')
+                self.logger.error(err_json)
+                self.logger.error(f"Failed to get item using DDS API\n")
             except:
                 self.logger.error("Failed to get item using DDS API\n")
                 #  self.logger.error(f"resp: {resp.content}")
@@ -97,7 +86,7 @@ class DDS_API():
 
         self.logger.info(f"Downloading image to {dest_fn}...\n")
 
-        with requests.get(download_url, stream=True, verify=False) as stream:
+        with requests.get(download_url, stream=True, verify=self.verify_ssl) as stream:
             with open(dest_fn, 'wb') as pipe:
                 with tqdm.wrapattr(
                         pipe,

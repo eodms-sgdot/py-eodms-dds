@@ -1,14 +1,14 @@
-from eodms_dds import dds, aaa
+from eodms_dds import dds, aaa, config
 from pystac_client import Client
 from typing import Optional, List, Dict, Any
 # import json
 import click
 import os
 import ssl
+import requests
 from requests.packages import urllib3
-
-ssl._create_default_https_context = ssl._create_unverified_context
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+from urllib.parse import unquote
+from urllib.parse import urlparse, parse_qs
 
 def search(aaa_api=None, environment='prod', 
                 collections: Optional[List[str]] = None,
@@ -27,24 +27,44 @@ def search(aaa_api=None, environment='prod',
     :return: List of item dictionaries
     """
     
-    domain = "https://www.eodms-sgdot.nrcan-rncan.gc.ca"
+    domain_config = config.get_domain_config(environment)
+    domain = domain_config['domain']
     search_endpoint = f"{domain}/search"
+    verify_ssl = domain_config.get('verify_ssl', True)
+    
+    # Create a custom session with verify setting
+    session = requests.Session()
+    session.verify = verify_ssl
     
     # Prepare headers with authentication if available
     headers = {}
     if aaa_api:
         access_token = aaa_api.get_access_token()
+        if not access_token:
+            print("Authentication failed - no access token available")
+            return []
         headers = {"Authorization": f"Bearer {access_token}"}
-        print("Using authenticated search")
+        print(f"Using authenticated search: {search_endpoint}")
     else:
-        print("Using unauthenticated search")
+        print(f"Using unauthenticated search: {search_endpoint}")
     
-    # Open STAC catalog with optional authentication
-    if headers:
-        client = Client.open(search_endpoint, headers=headers)
+    # Open client with custom session
+    if environment == 'staging':
+        client = Client.open(
+            search_endpoint, 
+            headers=headers if headers else None,
+            request_modifier=lambda request: setattr(session, 'verify', verify_ssl) or request
+        )
+        client._stac_io.session = session
     else:
-        client = Client.open(search_endpoint)
+        client = Client.open(search_endpoint, headers=headers if headers else None)
     
+    # Print available collections
+    print("Available collections:")
+    for collection in client.get_collections():
+        print(f"  - {collection.id}")
+    print()
+
     # Build search parameters
     search_params = {}
     
@@ -61,13 +81,61 @@ def search(aaa_api=None, environment='prod',
     search_params.update(kwargs)
     
     # Execute search
-    search = client.search(**search_params, method='GET')
-    search_results = search.item_collection()
-    
-    # Convert to list of dictionaries
-    items = [item.to_dict() for item in search_results]
-    
-    print(f"Found {len(items)} items")
+    try:
+        items = []
+        max_items = kwargs.get('max_items', 1000)  # Default to 10 items, can be overridden
+        page_token = None
+        
+        print(f"Searching for up to {max_items} items...")
+        
+        while len(items) < max_items:
+            # Add page token to search params if we have one
+            current_params = search_params.copy()
+            if page_token:
+                current_params['token'] = page_token
+            
+            search = client.search(**current_params, method='GET')
+            print(unquote(search.url_with_parameters()))
+            
+            search_results = search.item_collection()
+            
+            # Convert to list of dictionaries
+            batch_items = [item.to_dict() for item in search_results]
+            
+            if not batch_items:
+                print("No more items found")
+                break
+            
+            items.extend(batch_items)
+            print(f"Retrieved {len(batch_items)} items (total: {len(items)})")
+            
+            # Check if there's a next page token
+            # STAC typically returns this in links with rel="next"
+            next_link = next((link for link in search_results.links if link.rel == 'next'), None)
+            
+            if next_link and len(items) < max_items:
+                # Extract token from next link if present
+                # This may vary by implementation, adjust as needed
+                page_token = next_link.extra_fields.get('token') or next_link.extra_fields.get('page')
+                if not page_token:
+                    # Try to parse from URL if not in extra_fields
+                    parsed = urlparse(next_link.href)
+                    qs = parse_qs(parsed.query)
+                    page_token = qs.get('token', [None])[0] or qs.get('page', [None])[0]
+                
+                if not page_token:
+                    print("No next page token found")
+                    break
+            else:
+                break
+        
+        # Trim to max_items if we retrieved more
+        items = items[:max_items]
+        print(f"Found {len(items)} items (limited to {max_items})")
+
+    except Exception as e:
+        print(f"Search error: {e}")
+        return []
     
     return items
 
@@ -88,7 +156,7 @@ def download(dds_api, collection, item_uuid, out_folder):
 def run(eodms_user, eodms_pwd, collection, env, out_folder, datetime_range=None, bbox=None, uuid=None):
 
     # Create shared AAA instance
-    aaa_api = aaa.AAA_API(eodms_user, eodms_pwd) if eodms_user and eodms_pwd else None
+    aaa_api = aaa.AAA_API(eodms_user, eodms_pwd, env) if eodms_user and eodms_pwd else None
 
     dds_api = dds.DDS_API(aaa_api, env)
 
@@ -122,8 +190,7 @@ def run(eodms_user, eodms_pwd, collection, env, out_folder, datetime_range=None,
               help='Temporal filter as ISO 8601 string or range (e.g., "2023-01-01/2023-12-31").')
 @click.option('--bbox', '-b', required=False, default=None,
               help='Bounding box as comma-separated values: west,south,east,north (e.g., "-100,45,-95,50").')
-@click.option('--env', '-e', required=False, default='prod', 
-              help='The AWS environment.')
+@click.option('--env', '-e', required=False, default='prod', help='Defaults to "prod". If "staging", define `EODMS_STAGING_DOMAIN` env variable.')
 @click.option('--out_folder', '-o', required=False, default='.',
               help='The output folder.')
 def cli(username, password, collection, uuid, datetime, bbox, env, out_folder):
