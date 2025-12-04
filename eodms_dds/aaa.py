@@ -8,9 +8,7 @@ from datetime import datetime, timedelta
 import dateparser
 from . import api_logger
 from .__version__ import __version__
-
-ssl._create_default_https_context = ssl._create_unverified_context
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+from . import config
 
 class AAA_Creds():
 
@@ -25,7 +23,7 @@ class AAA_Creds():
 
         self.cred_fn = None
 
-        self.logger = api_logger.EODMSLogger('EODMS_AAA', api_logger.eodms_logger)
+        self.logger = api_logger.EODMSLogger('eodms_aaa', api_logger.eodms_logger)
 
     def get_json(self, with_seconds=False):
         """
@@ -162,26 +160,33 @@ class AAA_Creds():
 
 class AAA_API():
 
-    def __init__(self, username, password):
+    def __init__(self, username, password, environment='prod'):
+        """
+        Initializes the AAA_API instance.
+        :param username: EODMS username
+        :param password: EODMS password
+        :param environment: Environment to use ('prod' or 'staging')
+        """
 
         self.aaa_creds = AAA_Creds()
+        self.logger = api_logger.EODMSLogger('eodms_aaa', api_logger.eodms_logger)
 
         self.username = username
         self.password = password
 
-        self.domain = "https://www.eodms-sgdot.nrcan-rncan.gc.ca"
+        domain_config = config.get_domain_config(environment)
+        self.domain = domain_config['domain']
+        self.verify_ssl = domain_config.get('verify_ssl', True)
 
         user_folder = os.path.expanduser('~')
         self.auth_folder = os.path.join(user_folder, '.eodms')
-        self.aaa_creds.set_fn(os.path.join(self.auth_folder, 'aaa_creds.json'))
+        self.aaa_creds.set_fn(os.path.join(self.auth_folder, f'aaa_creds.{self.username}.{environment}.json'))
 
         if not os.path.exists(self.auth_folder):
             os.makedirs(self.auth_folder)
 
         self.login_success = True
         self.response = None
-
-        self.logger = api_logger.EODMSLogger('EODMS_AAA', api_logger.eodms_logger)
 
     def get_access_token(self):
         """
@@ -193,12 +198,13 @@ class AAA_API():
             - existing Access Token if both tokens have not expired
             - "refresh" if the Access Token has expired but the Refresh
                 Token has not
-            - "loging" if both tokens have expired
+            - "logging" if both tokens have expired
         """
 
         self.aaa_creds.import_vals()
 
         if self.aaa_creds.access_token is None:
+            self.logger.info("No existing Access Token found. Logging in...")
             self._login()
             return self.aaa_creds.access_token
 
@@ -229,14 +235,15 @@ class AAA_API():
     def prepare_request(self, url, method='GET', **kwargs):
 
         req = requests.Request(method, url, **kwargs)
+        
         prepared = req.prepare()
         
         # Send the request
         session = requests.Session()
         session.trust_env = False
-        response = session.send(prepared)
+        response = session.send(prepared, verify=self.verify_ssl)
 
-        self.logger.info(f"response headers: {response.request.headers}")
+        #self.logger.info(f"response headers: {response.request.headers}")
 
         return response
 
@@ -284,6 +291,8 @@ class AAA_API():
             "password": self.password,
             "username": self.username
         }
+
+        #self.logger.info(f"Logging into {url} (user {self.username} pass {self.password})...")
 
         # resp = requests.post(url, json=payload, trust_env=False, verify=False) #, verify=False)
         resp = self.prepare_request(url, "POST", json=payload)

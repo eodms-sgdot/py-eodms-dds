@@ -15,4 +15,4 @@ class EODMSLogger(logging.LoggerAdapter):
 
     def process(self, msg: str, kwargs):
         # Apply header to message
-        return f"| {self.header} | {msg}", kwargs
+        return f"[ {self.header} ] {msg}", kwargs

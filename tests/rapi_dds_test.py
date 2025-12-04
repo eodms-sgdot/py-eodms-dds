@@ -1,4 +1,4 @@
-from eodms_dds import dds
+from eodms_dds import dds, aaa
 from eodms_rapi import EODMSRAPI
 import click
 import os
@@ -34,7 +34,10 @@ def extract_uuid(results):
 
 def run(eodms_user, eodms_pwd, collection, env, out_folder):
 
-    dds_api = dds.DDS_API(eodms_user, eodms_pwd, env)
+    # Create shared AAA instance
+    aaa_api = aaa.AAA_API(eodms_user, eodms_pwd)
+
+    dds_api = dds.DDS_API(aaa_api, env)
 
     rapi = EODMSRAPI(eodms_user, eodms_pwd)
 
