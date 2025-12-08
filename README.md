@@ -18,8 +18,11 @@ pip install git+https://github.com/eodms-sgdot/py-eodms-dds.git
 ```python
 from eodms_dds import dds
 
-# First, create the DDS_API with your EODMS username and password.
-dds_api = dds.DDS_API(eodms_user, eodms_pwd)
+# First, create the AAA_API with your EODMS username and password.
+aaa_api = aaa.AAA_API(username, password, env)
+
+# Next, create the client DDS API using the AAA obj
+dds_api = dds.DDS_API(aaa_api, env)
 
 # Set the Collection Id and the UUID
 collection = 'RCMImageProducts'
