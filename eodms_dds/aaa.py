@@ -228,7 +228,7 @@ class AAA_API():
             self.logger.warning("WARNING: Could not access current AAA "
                   f"session with existing tokens in {self.aaa_creds.cred_fn}")
             
-        self._print_response()
+        # self._print_response()
 
         return self.aaa_creds.access_token
     
