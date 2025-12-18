@@ -10,7 +10,7 @@ eodms_logger.setLevel(logging.INFO)
 
 class EODMSLogger(logging.LoggerAdapter):
     def __init__(self, header: str, logger: logging.Logger):
-        super().__init__(logger)
+        super().__init__(logger, {})
         self.header = header
 
     def process(self, msg: str, kwargs):
